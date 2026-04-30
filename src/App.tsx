@@ -188,7 +188,7 @@ function SecurityLock({ onUnlock }: { onUnlock: () => void }) {
             Acessar Sistema
           </button>
         </form>
-        <p className="mt-8 text-[10px] text-slate-300 uppercase tracking-tighter">Smartphone Stock Manager v1.0.5</p>
+        <p className="mt-8 text-[10px] text-slate-300 uppercase tracking-tighter">Smartphone Stock Manager v1.1.0 - Protegido</p>
       </motion.div>
     </div>
   );
