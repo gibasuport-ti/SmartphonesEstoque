@@ -1,0 +1,5 @@
+{
+  "name": "Smartphone Stock Manager",
+  "description": "A comprehensive app for managing smartphone stock, including data import from CSV, TXT, and Excel files, with secure Firebase integration.",
+  "requestFramePermissions": ["camera"]
+}

@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: smartphones
+    // Fields:
+    //   - marca: string (required)
+    //   - modelo: string (required)
+    //   - serial: string (required)
+    //   - estado: string (required)
+    //   - devolvido_por: string (optional)
+    //   - data_devolucao: string (optional)
+    //   - observacao: string (optional)
+    //   - uid: string (required, immutable)
+    //   - createdAt: string (required, immutable)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidSmartphone(data) {
+      return data.marca is string && data.marca.size() > 0 && data.marca.size() < 100 &&
+             data.modelo is string && data.modelo.size() > 0 && data.modelo.size() < 100 &&
+             data.serial is string && data.serial.size() > 0 && data.serial.size() < 100 &&
+             data.estado is string && data.estado.size() > 0 && data.estado.size() < 50 &&
+             (!('devolvido_por' in data) || (data.devolvido_por is string && data.devolvido_por.size() < 100)) &&
+             (!('data_devolucao' in data) || (data.data_devolucao is string)) &&
+             (!('observacao' in data) || (data.observacao is string && data.observacao.size() < 1000)) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.createdAt is string;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "gibasuporte@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    match /smartphones/{smartphoneId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && 
+                      hasRequiredFields(['marca', 'modelo', 'serial', 'estado', 'uid', 'createdAt']) &&
+                      hasOnlyAllowedFields(['marca', 'modelo', 'serial', 'estado', 'devolvido_por', 'data_devolucao', 'observacao', 'uid', 'createdAt']) &&
+                      isValidSmartphone(request.resource.data);
+      allow update: if (isDocOwner() || isAdmin()) && 
+                      hasOnlyAllowedFields(['marca', 'modelo', 'serial', 'estado', 'devolvido_por', 'data_devolucao', 'observacao', 'uid', 'createdAt']) &&
+                      isValidSmartphone(request.resource.data) &&
+                      request.resource.data.uid == resource.data.uid &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "Smartphone": {
+      "title": "Smartphone",
+      "description": "Represents a smartphone in stock.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the smartphone." },
+        "marca": { "type": "string", "description": "Brand of the smartphone." },
+        "modelo": { "type": "string", "description": "Model of the smartphone." },
+        "serial": { "type": "string", "description": "Serial number of the smartphone." },
+        "estado": { "type": "string", "description": "Condition of the smartphone (e.g., BOM)." },
+        "devolvido_por": { "type": "string", "description": "Name of the person who returned it." },
+        "data_devolucao": { "type": "string", "format": "date", "description": "Date of return." },
+        "observacao": { "type": "string", "description": "Additional observations." },
+        "uid": { "type": "string", "description": "User ID of the owner." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." }
+      },
+      "required": ["marca", "modelo", "serial", "estado", "uid", "createdAt"]
+    }
+  },
+  "firestore": {
+    "smartphones": {
+      "schema": "Smartphone",
+      "description": "Collection of smartphones in stock."
+    }
+  }
+}
